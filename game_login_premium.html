@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fantasy Game Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#000;
+    overflow:hidden;
+    font-family:'Rajdhani',sans-serif;
+}
+
+/* =======================
+   MAIN WRAP
+======================= */
+
+.wrap{
+    position:relative;
+    width:100%;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#ffffff;
+     background:linear-gradient(135deg,#14213d,#1d3557,#3a86ff);
+}
+
+/* =======================
+   VIDEO
+======================= */
+
+.video-bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:
+        brightness(.45)
+        contrast(1.2)
+        saturate(1.3);
+    z-index:0;
+}
+
+.overlay{
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(
+        to bottom,
+        rgba(255, 253, 253, 0.85),
+        rgba(255, 255, 255, 0.35),
+        rgba(255, 255, 255, 0.95)
+    );
+    z-index:1;
+}
+
+/* =======================
+   STARS
+======================= */
+
+#stars{
+    position:absolute;
+    inset:0;
+    z-index:2;
+}
+
+/* =======================
+   GLOW RINGS
+======================= */
+
+.glow-ring{
+    position:absolute;
+    width:500px;
+    height:500px;
+    border-radius:50%;
+    border:1px solid rgba(170,130,255,.15);
+    box-shadow:
+        0 0 100px rgba(120,80,255,.15),
+        inset 0 0 40px rgba(120,80,255,.05);
+    animation:ring 5s infinite ease-in-out;
+    z-index:3;
+}
+
+.glow-ring2{
+    position:absolute;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.08);
+    animation:ring 3s infinite ease-in-out;
+    z-index:3;
+}
+
+@keyframes ring{
+    0%,100%{
+        transform:scale(1);
+        opacity:.4;
+    }
+    50%{
+        transform:scale(1.08);
+        opacity:1;
+    }
+}
+
+/* =======================
+   CONTENT
+======================= */
+
+.content{
+    position:relative;
+    z-index:10;
+    width:100%;
+    max-width:430px;
+    padding:20px;
+    text-align:center;
+    opacity:0;
+    transition:1s;
+}
+
+/* =======================
+   START PANEL
+======================= */
+
+.badge{
+    display:inline-block;
+    padding:6px 18px;
+    border-radius:30px;
+    border:1px solid rgba(200,180,255,.3);
+    color:#d7c2ff;
+    letter-spacing:3px;
+    font-size:11px;
+    margin-bottom:18px;
+}
+
+.game-title{
+    font-family:'Cinzel',serif;
+    font-size:58px;
+    color:white;
+    line-height:1;
+    text-shadow:
+        0 0 20px #9b7fff,
+        0 0 50px #8f67ff;
+}
+
+.subtitle{
+    margin-top:15px;
+    color:#c7c7c7;
+    letter-spacing:5px;
+    font-size:12px;
+    text-transform:uppercase;
+}
+
+.begin-btn{
+    margin-top:40px;
+    width:220px;
+    height:58px;
+    border:none;
+    cursor:pointer;
+    border-radius:12px;
+    background:linear-gradient(135deg,#6b46ff,#8e65ff);
+    color:white;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:4px;
+    transition:.3s;
+    box-shadow:
+        0 0 25px rgba(120,80,255,.4);
+}
+
+.begin-btn:hover{
+    transform:translateY(-3px);
+}
+
+.tap-hint{
+    margin-top:15px;
+    color:rgba(255,255,255,.4);
+    font-size:11px;
+    letter-spacing:3px;
+}
+
+.server{
+    margin-top:30px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255, 255, 255, 0.05);
+    border:1px solid rgba(255,255,255,.1);
+    padding:10px 18px;
+    border-radius:10px;
+    color:white;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#00ff84;
+    box-shadow:0 0 15px #00ff84;
+}
+
+/* =======================
+   LOGIN
+======================= */
+
+#loginPanel{
+    display:none;
+}
+
+.login-box{
+    width:100%;
+    background:rgba(12,15,35,.88);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(180,150,255,.25);
+    border-radius:18px;
+    padding:30px;
+    box-shadow:
+        0 0 40px rgba(120,80,255,.2);
+}
+
+.login-title{
+    color:white;
+    font-family:'Cinzel',serif;
+    font-size:28px;
+}
+
+.login-sub{
+    margin-top:8px;
+    margin-bottom:25px;
+    color:#a89cf2;
+    font-size:12px;
+    letter-spacing:2px;
+}
+
+.field{
+    text-align:left;
+    margin-bottom:15px;
+}
+
+.field label{
+    color:#c5b4ff;
+    font-size:12px;
+    display:block;
+    margin-bottom:5px;
+}
+
+.field input{
+    width:100%;
+    padding:12px;
+    border:none;
+    outline:none;
+    border-radius:10px;
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.field input:focus{
+    border:1px solid #8e65ff;
+}
+
+.login-btn{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:10px;
+    background:#7a56ff;
+    color:white;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.login-btn:hover{
+    background:#8b6cff;
+}
+
+.msg{
+    margin-top:15px;
+    min-height:20px;
+    font-weight:700;
+}
+
+.ok{
+    color:#00ff84;
+}
+
+.err{
+    color:#ff6b6b;
+}
+
+.social{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.social button{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+    color:white;
+    cursor:pointer;
+}
+
+.register-link{
+    margin-top:20px;
+    color:#a89cf2;
+    font-size:13px;
+    letter-spacing:.5px;
+}
+
+.register-link a{
+    color:#c5b4ff;
+    font-weight:700;
+    text-decoration:none;
+    border-bottom:1px solid rgba(197,180,255,.4);
+    transition:.2s;
+}
+
+.register-link a:hover{
+    color:#fff;
+    border-color:#fff;
+}
+
+.back{
+    margin-top:20px;
+    color:#c8b7ff;
+    cursor:pointer;
+}
+
+.version{
+    position:absolute;
+    left:15px;
+    bottom:15px;
+    color:rgba(255, 255, 255, 0.25);
+    font-size:11px;
+    z-index:20;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+    <video class="video-bg" autoplay loop muted playsinline>
+        <source src="xemoi.mp4" type="video/mp4">
+    </video>
+
+    
+
+    <canvas id="stars"></canvas>
+
+    <div class="glow-ring"></div>
+    <div class="glow-ring2"></div>
+
+    <div class="content" id="content">
+
+        <!-- START -->
+
+        <div id="startPanel">
+
+            <div class="badge">✦ ONLINE ✦</div>
+
+            <div class="game-title">
+                BEGIN<br>GAME
+            </div>
+
+            <div class="subtitle">
+                Touch To Enter
+            </div>
+
+            <button class="begin-btn" id="beginBtn">
+                START
+            </button>
+
+            <div class="tap-hint">
+                TAP ANYWHERE TO CONTINUE
+            </div>
+
+            <div class="server">
+                <div class="dot"></div>
+                Europe Server
+            </div>
+
+        </div>
+
+        <!-- LOGIN -->
+
+        <div id="loginPanel">
+
+            <div class="login-box">
+
+                <div class="login-title">
+                    ENTER REALM
+                </div>
+
+                <div class="login-sub">
+                    SIGN IN TO YOUR ACCOUNT
+                </div>
+
+                <div class="field">
+                    <label>Username</label>
+                    <input type="text" id="user" placeholder="nguyenvana">
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="pass">
+                </div>
+
+                <button class="login-btn" id="loginBtn">
+                    LOGIN
+                </button>
+
+                <div class="msg" id="msg"></div>
+
+                <div class="social">
+                    <button>Google</button>
+                    <button>Facebook</button>
+                </div>
+
+                <div class="register-link">
+                    Chưa có tài khoản? <a href="dang-ky-sieu-xe.html">Đăng ký ngay</a>
+                </div>
+
+                <div class="back" id="backBtn">
+                    ← Back To Title
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="version">
+        OSRELAndroid4.5.0_R21321795
+    </div>
+
+</div>
+
+<script>
+
+/* ======================
+   SHOW MENU AFTER 2 SEC
+====================== */
+
+window.onload=function(){
+
+    setTimeout(()=>{
+        document.getElementById("content").style.opacity="1";
+    },2000);
+
+};
+
+/* ======================
+   STARS
+====================== */
+
+const canvas=document.getElementById("stars");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+}
+
+resize();
+
+window.addEventListener("resize",resize);
+
+const stars=[];
+
+for(let i=0;i<180;i++){
+
+    stars.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*2,
+        a:Math.random(),
+        d:Math.random()*0.02
+    });
+
+}
+
+function animate(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    stars.forEach(s=>{
+
+        s.a+=s.d;
+
+        if(s.a>=1||s.a<=0){
+            s.d*=-1;
+        }
+        
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+        ctx.fill();
+
+    });
+
+    requestAnimationFrame(animate);
+
+}
+
+animate();
+
+/* ======================
+   OPEN LOGIN
+====================== */
+
+document.getElementById("beginBtn").onclick=function(){
+
+    document.getElementById("startPanel").style.display="none";
+
+    document.getElementById("loginPanel").style.display="block";
+
+};
+
+/* ======================
+   BACK
+====================== */
+
+document.getElementById("backBtn").onclick=function(){
+
+    document.getElementById("loginPanel").style.display="none";
+
+    document.getElementById("startPanel").style.display="block";
+
+};
+
+/* ======================
+   LOGIN
+====================== */
+
+document.getElementById("loginBtn").onclick=function(){
+
+    const user=document.getElementById("user").value.trim();
+
+    const pass=document.getElementById("pass").value;
+
+    const msg=document.getElementById("msg");
+
+    if(user==="" || pass===""){
+
+        msg.className="msg err";
+
+        msg.innerHTML="Please fill in all fields!";
+
+        return;
+    }
+
+    msg.className="msg";
+
+    msg.innerHTML="Connecting to server...";
+
+    const formData=new URLSearchParams();
+    formData.append("user",user);
+    formData.append("pass",pass);
+
+    fetch("LoginServlet",{
+        method:"POST",
+        body:formData
+    })
+    .then(res=>res.text())
+    .then(data=>{
+        if(data.trim()==="success"){
+            msg.className="msg ok";
+            msg.innerHTML="✦ Welcome Back Hero ✦";
+
+            /* Lưu trạng thái đăng nhập + tên người dùng để
+               trang chủ (Xe.html) hiển thị tên ở menu.
+               Nếu sau này LoginServlet trả về JSON kèm tên đầy đủ
+               (vd: {"status":"success","tenUser":"Nguyễn Văn A"}),
+               hãy thay dòng dưới bằng tên lấy từ response đó. */
+            localStorage.setItem("mansory_logged_in","true");
+            localStorage.setItem("mansory_user_name",user);
+
+            window.location.href="video.html";
+        } else {
+            msg.className="msg err";
+            msg.innerHTML="Sai tài khoản hoặc mật khẩu!";
+        }
+    })
+    .catch(()=>{
+        msg.className="msg err";
+        msg.innerHTML="Lỗi không kết nối được Server!";
+    });
+
+};
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đang đăng xuất...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #000; color: #fff; }
+    </style>
+</head>
+<body>
+    <div id="status">Đang thoát tài khoản...</div>
+
+    <script>
+        // Xóa thông tin đăng nhập ngay lập tức
+        localStorage.removeItem('mansory_logged_in');
+        localStorage.removeItem('mansory_user_name');
+
+        // Hiển thị thông báo và quay về trang chủ sau 1.5 giây
+        setTimeout(() => {
+            document.getElementById('status').innerText = "Đăng xuất thành công!";
+            window.location.href = "Xe.html";
+        }, 1500);
+    </script>
+</body>
+</html>

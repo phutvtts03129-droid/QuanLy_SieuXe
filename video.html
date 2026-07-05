@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Giới Thiệu Xe</title>
+ 
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+ 
+        body{
+            overflow:hidden;
+            background:black;
+        }
+ 
+        video{
+            width:100%;
+            height:100vh;
+            object-fit:cover;
+        }
+        .banner video{
+            position:relative;
+            z-index:0;
+        }
+ 
+        .overlay{
+            z-index:1;
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:black;
+            opacity:0;
+            pointer-events:none;
+            transition: opacity 1s ease-in-out;
+        }
+ 
+        .overlay.fade-out{
+            opacity:1;
+        }
+ 
+        body.fading video{
+            transition: filter 1s ease-in-out, transform 1s ease-in-out;
+            filter: brightness(0.6) blur(2px);
+            transform: scale(1.00);
+        }
+ 
+        .banner-content,
+        .button{
+            position:relative;
+            z-index:2;
+        }
+    </style>
+</head>
+<body>
+ 
+    <video autoplay muted playsinline>
+        <source src="mercedes.mp4" type="video/mp4">
+    </video>
+ 
+    <div class="overlay" id="fadeOverlay"></div>
+ 
+    <script>
+        const fadeDelay = 5000;      // thời gian chờ trước khi bắt đầu chuyển trang (ms)
+        const fadeDuration = 1000;   // thời gian hiệu ứng fade (ms) - phải khớp với CSS transition
+        const targetPage = "Xe.html"; // trang đích
+ 
+        setTimeout(function(){
+            document.body.classList.add('fading');
+            document.getElementById('fadeOverlay').classList.add('fade-out');
+ 
+            setTimeout(function(){
+                window.location.href = targetPage;
+            }, fadeDuration);
+        }, fadeDelay);
+    </script>
+ 
+</body>
+</html>

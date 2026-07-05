@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng Nhập Showroom Xe</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7') center/cover;
+}
+
+.login-box{
+    width:400px;
+    padding:40px;
+    backdrop-filter:blur(15px);
+    background:rgba(255,255,255,0.1);
+    border-radius:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    color:white;
+}
+
+.login-box h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.input-group{
+    margin-bottom:20px;
+}
+
+.input-group input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#ff4d4d;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#ff1a1a;
+    transform:scale(1.05);
+}
+</style>
+
+</head>
+<body>
+
+<div class="login-box">
+    <h1>🚗 Đăng Nhập</h1>
+
+    <div class="input-group">
+        <input type="text" id="user" placeholder="Tên đăng nhập">
+    </div>
+
+    <div class="input-group">
+        <input type="password" id="pass" placeholder="Mật khẩu">
+    </div>
+
+    <button onclick="login()">Đăng Nhập</button>
+</div>
+
+<script>
+function login(){
+
+    let user = document.getElementById("user").value;
+    let pass = document.getElementById("pass").value;
+
+    if(user === "admin" && pass === "123"){
+        window.location.href="video.html";
+    }else{
+        alert("Sai tài khoản hoặc mật khẩu!");
+    }
+}
+</script>
+
+</body>
+</html>

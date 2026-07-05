@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBER — Đăng ký trải nghiệm siêu xe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+   --bg-0: #0a0a0a;
+    --bg-1: #101216;
+    --steel: #c7ccd4;
+    --steel-dim: #6b7078;
+    --ember: #ff4d00;
+    --ember-soft: #ff6a2b;
+    --line: rgba(199, 204, 212, 0.12);
+    --glass: rgba(16, 18, 22, 0.55);
+    --font-display: 'Oswald', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg-0);
+    color: var(--steel);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  body { min-height: 100vh; position: relative; }
+
+  /* ---------- video background ---------- */
+  .video-bg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    height: 100vw;
+    transform: translate(-50%, -50%) rotate(270deg);
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.7) saturate(1.1);
+  }
+
+  /* ---------- canvas light streaks (overlaid on top of video) ---------- */
+  #streaks {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: block;
+    mix-blend-mode: screen;
+  }
+
+ .bg-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    background:
+      radial-gradient(
+        ellipse 80% 60% at 70% 20%,
+        rgba(255,77,0,0.05),
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.15) 70%,
+        rgba(0,0,0,0.25) 100%
+      );
+    pointer-events: none;
+}
+
+  .floor-grid {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 38vh;
+    z-index: 2;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+            mask-image: linear-gradient(to top, black, transparent);
+    transform: perspective(300px) rotateX(55deg);
+    transform-origin: bottom;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* ---------- layout ---------- */
+  .wrap {
+    position: relative;
+    z-index: 3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px clamp(20px, 5vw, 64px) 0;
+  }
+
+  .mark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.18em;
+    color: var(--steel);
+  }
+  .mark span { color: var(--ember); }
+
+  .mark-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--steel-dim);
+    display: none;
+  }
+  @media (min-width: 640px) { .mark-sub { display: block; } }
+
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: clamp(24px, 5vw, 64px);
+    padding: clamp(32px, 6vh, 64px) clamp(20px, 5vw, 64px);
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; padding-top: 24px; }
+  }
+
+  /* ---------- hero copy ---------- */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--ember-soft);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    opacity: 0;
+    animation: rise 0.7s ease forwards 0.1s;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ember);
+    box-shadow: 0 0 12px 2px var(--ember);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: clamp(40px, 7vw, 84px);
+    line-height: 0.96;
+    letter-spacing: 0.01em;
+    color: #f3f4f6;
+    opacity: 0;
+    animation: rise 0.8s ease forwards 0.22s;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--ember);
+  }
+
+  .lede {
+    margin-top: 22px;
+    max-width: 46ch;
+    font-size: clamp(15px, 1.6vw, 17px);
+    line-height: 1.6;
+    color: #aeb3bc;
+    opacity: 0;
+    animation: rise 0.8s ease forwards 0.34s;
+  }
+
+  .stat-row {
+    margin-top: 36px;
+    display: flex;
+    gap: clamp(20px, 4vw, 40px);
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: rise 0.8s ease forwards 0.46s;
+  }
+  .stat b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: #f3f4f6;
+  }
+  .stat span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--steel-dim);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* ---------- form panel ---------- */
+  .panel {
+    position: relative;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: clamp(24px, 3vw, 36px);
+    opacity: 0;
+    animation: rise 0.8s ease forwards 0.5s;
+  }
+  .panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--ember), transparent 70%);
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--steel-dim);
+    margin-bottom: 4px;
+  }
+  .panel-title b { color: var(--ember-soft); }
+
+  .panel h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #f3f4f6;
+    margin-bottom: 22px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--steel-dim);
+    margin-bottom: 7px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: #f3f4f6;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .field input::placeholder { color: #5c616a; }
+
+  .field input:hover, .field select:hover {
+    border-color: rgba(137, 152, 175, 0.3);
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px rgba(255,77,0,0.16);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0L5 6L10 0' fill='none' stroke='%236b7078' stroke-width='1.4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  .input-pass { position: relative; }
+  .input-pass input { width: 100%; padding-right: 56px; }
+  .pass-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--steel-dim);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .pass-toggle:hover { color: var(--ember-soft); border-color: var(--ember-soft); }
+  .pass-toggle:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+
+  .field-error {
+    display: none;
+    margin-top: 7px;
+    font-size: 11px;
+    color: #ff6b6b;
+  }
+  .field-error.show { display: block; }
+
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 18px 0 16px;
+  }
+  .check-row input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--ember);
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .check-row label {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--steel-dim);
+  }
+  .check-row a { color: var(--ember-soft); text-decoration: none; }
+  .check-row a:hover { text-decoration: underline; }
+
+  .login-link {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--steel-dim);
+  }
+  .login-link a {
+    color: var(--steel);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .login-link a:hover { color: var(--ember-soft); border-color: var(--ember-soft); }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 14px;
+    background: var(--ember);
+    color: #1a0900;
+    border: none;
+    border-radius: 3px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .submit-btn:hover {
+    background: var(--ember-soft);
+    box-shadow: 0 6px 24px -6px rgba(255,77,0,0.55);
+    transform: translateY(-1px);
+  }
+  .submit-btn:focus-visible {
+    outline: 2px solid var(--steel);
+    outline-offset: 3px;
+  }
+  .submit-btn:active { transform: translateY(0); }
+
+  .fine-print {
+    margin-top: 14px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--steel-dim);
+    text-align: center;
+  }
+
+  .success {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .success.show { display: block; }
+  .success .ok-mark {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--ember);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--ember-soft);
+    font-size: 20px;
+  }
+  .success h3 {
+    font-family: var(--font-display);
+    font-size: 19px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #f3f4f6;
+    margin-bottom: 8px;
+  }
+  .success p { font-size: 13px; color: var(--steel-dim); }
+
+  /* ---------- ticker ---------- */
+  .ticker {
+    position: relative;
+    z-index: 3;
+    border-top: 1px solid var(--line);
+    background: rgba(8,9,11,0.7);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+    padding: 13px 0;
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: scroll-left 26s linear infinite;
+  }
+  .ticker-item {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--steel-dim);
+    white-space: nowrap;
+    padding: 0 28px;
+    border-right: 1px solid var(--line);
+  }
+  .ticker-item b { color: var(--ember-soft); font-weight: 500; }
+
+  @keyframes scroll-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<video class="video-bg" autoplay loop muted playsinline poster="">
+  <source src="dANGKI.mp4" type="video/mp4">
+</video>
+<canvas id="streaks"></canvas>
+<div class="bg-veil"></div>
+<div class="floor-grid"></div>
+
+<div class="wrap">
+  <header>
+    <div class="mark">EMBER<span>.</span></div>
+    <div class="mark-sub">NỀN TẢNG CHO NGƯỜI YÊU SIÊU XE</div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="eyebrow">THÀNH VIÊN MỚI &nbsp;·&nbsp; MIỄN PHÍ THAM GIA</div>
+      <h1>Tạo tài khoản.<br>Bước vào <em>ga-ra</em>.</h1>
+      <p class="lede">Ember là nơi người mê siêu xe lưu lại garage của riêng mình: theo dõi mẫu xe yêu thích, đặt lịch lái thử và kết nối với cộng đồng cùng đam mê. Tạo tài khoản để bắt đầu.</p>
+      <div class="stat-row">
+        <div class="stat"><b>1.200+</b><span>THÀNH VIÊN GA-RA</span></div>
+        <div class="stat"><b>85</b><span>MẪU SIÊU XE THEO DÕI</span></div>
+        <div class="stat"><b>0đ</b><span>PHÍ THAM GIA</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="formView">
+        <div class="panel-title">TÀI KHOẢN MỚI <b>·</b> MIỄN PHÍ</div>
+        <h2>Tạo tài khoản</h2>
+        <form id="regForm">
+          <div class="field">
+            <label for="name">Họ và tên</label>
+            <input id="name" name="name" type="text" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="ban@email.com" required>
+          </div>
+          <div class="field">
+            <label for="password">Mật khẩu</label>
+            <div class="input-pass">
+              <input id="password" name="password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required>
+              <button type="button" class="pass-toggle" data-target="password" aria-label="Hiện mật khẩu">HIỆN</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Xác nhận mật khẩu</label>
+            <div class="input-pass">
+              <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu" minlength="8" required>
+              <button type="button" class="pass-toggle" data-target="confirmPassword" aria-label="Hiện mật khẩu">HIỆN</button>
+            </div>
+            <p class="field-error" id="passError">Mật khẩu xác nhận không khớp.</p>
+          </div>
+          <div class="check-row">
+            <input id="terms" name="terms" type="checkbox" required>
+            <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a> của Ember.</label>
+          </div>
+          <button type="submit" class="submit-btn">Tạo tài khoản</button>
+          <p class="login-link">Đã có tài khoản? <a href="game_login_premium.html">Đăng nhập</a></p>
+        </form>
+      </div>
+
+      <div id="successView" class="success">
+        <div class="ok-mark">✓</div>
+        <h3>Tạo tài khoản thành công</h3>
+        <p>Chào mừng đến với Ember — kiểm tra email để xác minh tài khoản của bạn.</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="ticker">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</div>
+
+<script>
+  // ---------- registration form ----------
+  // Graceful fallback: if sieuxe-nen.mp4 isn't found next to this file,
+  // hide the <video> so the dark gradient + light streaks still look intentional.
+  const bgVideo = document.querySelector('.video-bg');
+  bgVideo.addEventListener('error', () => { bgVideo.style.display = 'none'; }, true);
+
+  const form = document.getElementById('regForm');
+  const passError = document.getElementById('passError');
+
+  document.querySelectorAll('.pass-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const target = document.getElementById(btn.dataset.target);
+      const isHidden = target.type === 'password';
+      target.type = isHidden ? 'text' : 'password';
+      btn.textContent = isHidden ? 'ẨN' : 'HIỆN';
+    });
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const pass = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    if (pass !== confirm) {
+      passError.classList.add('show');
+      document.getElementById('confirmPassword').focus();
+      return;
+    }
+    passError.classList.remove('show');
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('successView').classList.add('show');
+  });
+
+  // ---------- ticker content (duplicated for seamless loop) ----------
+  const specs = [
+    '0–100 KM/H: <b>2.9S</b>',
+    'CÔNG SUẤT: <b>720 MÃ LỰC</b>',
+    'TỐC ĐỘ TỐI ĐA: <b>340 KM/H</b>',
+    'HỘP SỐ: <b>7 CẤP LY HỢP KÉP</b>',
+    'TRỌNG LƯỢNG: <b>1420 KG</b>',
+    'SỐ CHỖ CÒN LẠI: <b>12</b>'
+  ];
+  const track = document.getElementById('tickerTrack');
+  const html = specs.map(s => `<div class="ticker-item">${s}</div>`).join('');
+  track.innerHTML = html + html;
+
+  // ---------- canvas light-streak background ----------
+  const canvas = document.getElementById('streaks');
+  const ctx = canvas.getContext('2d');
+  let w, h, streaks = [];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function makeStreak() {
+    const laneY = Math.random() * h;
+    return {
+      x: w + Math.random() * 400,
+      y: laneY,
+      len: 120 + Math.random() * 260,
+      speed: 7 + Math.random() * 14,
+      hue: Math.random() > 0.78 ? 'ember' : 'steel',
+      width: 0.6 + Math.random() * 1.6,
+      opacity: 0.12 + Math.random() * 0.3
+    };
+  }
+
+  const COUNT = 46;
+  for (let i = 0; i < COUNT; i++) {
+    const s = makeStreak();
+    s.x = Math.random() * w;
+    streaks.push(s);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    for (const s of streaks) {
+      const grad = ctx.createLinearGradient(s.x, s.y, s.x + s.len, s.y);
+      const color = s.hue === 'ember' ? '255,109,40' : '199,204,212';
+      grad.addColorStop(0, `rgba(${color},0)`);
+      grad.addColorStop(0.85, `rgba(${color},${s.opacity})`);
+      grad.addColorStop(1, `rgba(${color},0)`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = s.width;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x + s.len, s.y);
+      ctx.stroke();
+
+      s.x -= s.speed;
+      if (s.x + s.len < -50) {
+        Object.assign(s, makeStreak());
+      }
+    }
+    if (!reduceMotion) requestAnimationFrame(draw);
+  }
+
+  if (reduceMotion) {
+    // draw a single static frame
+    draw();
+  } else {
+    requestAnimationFrame(draw);
+  }
+</script>
+
+</body>
+</html>
